@@ -55,7 +55,7 @@ class userController extends Controller
                 $profile_pic = $request->file('pic');
                 $extension = $profile_pic->getClientOriginalExtension();
                 $profile_pic=time()."-profile.".$extension;
-                $request->role_id==2?$request->pic->move(public_path('/profiles/managers/'),$profile_pic):$request->pic->move(public_path('/profiles/valets/'),$profile_pic);
+                $request->role_id==2?$request->pic->move(public_path('/profiles/managers/'),$profile_pic):$request->pic->move(public_path('/profiles/customers/'),$profile_pic);
             }
 
             $user =  new User;
@@ -91,6 +91,13 @@ class userController extends Controller
                     'user' => $user,
                 ], 200);
 
+            }elseif($request->role_id == 4){
+                $user->save();
+                return Response::json([
+                    'success' => true,
+                    'msg'=> 'Customer Signed Up Successfully',
+                    'user' => $user,
+                ], 200);
             }else{
                 return Response::json([
                     'success' => false,
@@ -184,9 +191,13 @@ class userController extends Controller
         if ($user->role_id == 2){
             $user['manager'] = ValetManager::where('user_id',$user->id)->first();
             $user['manager']['locations'] = ValetManagerLocation::where('valet_manager_id',$user['manager']->id)->get();
+            $user->pic = url('profiles/managers/'.$user->pic);
         }elseif ($user->role_id == 3){
            $user['valet'] = Valet::where('user_id',$user->id)->first();
            $user['valet']['location'] = ValetManagerLocation::where('id',$user['valet']->id)->first();
+            $user->pic = url('profiles/valets/'.$user->pic);
+        }elseif ($user->role_id == 4){
+            $user->pic = url('profiles/customers/'.$user->pic);
         }else{
             return Response::json([
                 'success' => false,
@@ -231,7 +242,7 @@ class userController extends Controller
                     $profile_pic = $request->file('pic');
                     $extension = $profile_pic->getClientOriginalExtension();
                     $profile_pic=time()."-profile.".$extension;
-                    $request->role_id==2?$request->pic->move(public_path('/profiles/managers/'),$profile_pic):$request->pic->move(public_path('/profiles/valets/'),$profile_pic);
+                    $user->role_id==2?$request->pic->move(public_path('/profiles/managers/'),$profile_pic):$request->pic->move(public_path('/profiles/valets/'),$profile_pic);
                 }
 
                 $user->first_name = $request->first_name;
@@ -331,34 +342,46 @@ class userController extends Controller
 
     public function forgotPassword(Request $request)
     {
-        $email = $request->email;
-        $user = User::where('email',$email)->first();
-        if (isset($user)){
-            $code = substr(md5(time()), 0, 6);
-            $old = DB::table('password_resets')->where('email',$email)->first();
-            if (isset($old)){
-                DB::table('password_resets')->update([
-                    'token' => $code,
-                    'created_at' => now()
-                ]);
-            }else{
-                DB::table('password_resets')->insert([
-                    'email' => $email,
-                    'token' => $code,
-                    'created_at' => now()
-                ]);
-            }
-            Mail::to($email)->send(new ResetPasswordCode($code));
-            return Response::json([
-                'success' => true,
-                'msg'=>'A code is been send at your email please use that code to reset password',
-            ], 200);
-        }else{
+        $validator = Validator::make($request->all(), [
+            'email'=>['required']
+        ]);
+
+        if ($validator->fails()){
             return Response::json([
                 'success' => false,
-                'msg'=>'No user with this email exists',
-            ], 302);
+                'msg'=> $validator->messages(),
+            ], 301);
+        }else{
+            $email = $request->email;
+            $user = User::where('email',$email)->first();
+            if (isset($user)){
+                $code = substr(md5(time()), 0, 6);
+                $old = DB::table('password_resets')->where('email',$email)->first();
+                if (isset($old)){
+                    DB::table('password_resets')->update([
+                        'token' => $code,
+                        'created_at' => now()
+                    ]);
+                }else{
+                    DB::table('password_resets')->insert([
+                        'email' => $email,
+                        'token' => $code,
+                        'created_at' => now()
+                    ]);
+                }
+                Mail::to($email)->send(new ResetPasswordCode($code));
+                return Response::json([
+                    'success' => true,
+                    'msg'=>'A code is been send at your email please use that code to reset password',
+                ], 200);
+            }else{
+                return Response::json([
+                    'success' => false,
+                    'msg'=>'No user with this email exists',
+                ], 302);
+            }
         }
+
 
     }
 
