@@ -17,6 +17,8 @@ Route::GROUP(['namespace'=>'App\Http\Controllers\Api'], function () {
     Route::get('get_roles','userController@getRoles');
     Route::post('signup','userController@signUp');
     Route::post('signin','userController@signIn');
+    Route::post('forgot/password','userController@forgotPassword');
+    Route::post('update/password','userController@updatePassword');
 });
 Route::GROUP(['namespace'=>'App\Http\Controllers\Api','middleware' => ['auth:sanctum']], function () {
     Route::post('signup/valet','userController@signUpValet');

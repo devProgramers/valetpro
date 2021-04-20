@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ResetPasswordCode;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Valet;
@@ -11,9 +12,12 @@ use App\Models\ValetManagerLocation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
+use File;
 
 class userController extends Controller
 {
@@ -197,13 +201,119 @@ class userController extends Controller
 
     }
 
-    public function update($id)
+    public function update(Request $request,$id)
     {
         $user = User::find($id);
         if ($user->role_id == 2){
+            $validator = Validator::make($request->all(), [
+                'first_name'=>['required'],
+                'last_name'=>['required'],
+                'phone'=>['required','min:1']]);
+
+            if ($validator->fails()){
+                return Response::json([
+                    'success' => false,
+                    'msg'=> $validator->messages(),
+                ], 301);
+            }else{
+
+                if($request->hasFile('pic'))
+                {
+                    $file=public_path('/profiles/managers/'.$user->pic);
+                    if (!empty($user->pic)) {
+
+                        if (File::exists($file)) {
+                            unlink($file);
+                        }
+                    }else{
+                        $profile_pic=$user->pic;
+                    }
+                    $profile_pic = $request->file('pic');
+                    $extension = $profile_pic->getClientOriginalExtension();
+                    $profile_pic=time()."-profile.".$extension;
+                    $request->role_id==2?$request->pic->move(public_path('/profiles/managers/'),$profile_pic):$request->pic->move(public_path('/profiles/valets/'),$profile_pic);
+                }
+
+                $user->first_name = $request->first_name;
+                $user->last_name = $request->last_name;
+                $user->phone = $request->phone;
+                $user->pic = $profile_pic ?? null;
+                if (isset($request->password)){
+                    $user->password = Hash::make($request->password);
+                }
+            }
+
+                if ($user->role_id == 2){
+                    $user->save();
+                    $manager = ValetManager::where('user_id',$user->id)->first();
+                    $manager->company_name = $request->company_name;
+                    $manager->save();
+
+                    if (is_array($request->location)){
+                        foreach ($request->location as $locations){
+                            $location = ValetManagerLocation::find($locations['id']);
+                            if (isset($location)){
+                                $location->name = $locations['name'];
+                                $location->address = $locations['address'];
+                                $location->longitude = $locations['longitude'];
+                                $location->latitude = $locations['latitude'];
+                                $location->save();
+                            }else{
+                                $location = new ValetManagerLocation;
+                                $location->valet_manager_id = $manager->id;
+                                $location->name = $locations['name'];
+                                $location->address = $locations['address'];
+                                $location->longitude = $locations['longitude'];
+                                $location->latitude = $locations['latitude'];
+                                $location->save();
+                                }
+                            }
+                        }
+                    }
 
         }elseif ($user->role_id == 3){
+            $validator = Validator::make($request->all(), [
+                'first_name'=>['required'],
+                'last_name'=>['required'],
+                'phone'=>['required','min:1'],
+                'valet_manager_location_id'=>['required','min:1']
+            ]);
 
+            if ($validator->fails()){
+                return Response::json([
+                    'success' => false,
+                    'msg'=> $validator->messages(),
+                ], 301);
+            }else{
+                if($request->hasFile('pic'))
+                {
+                    $file=public_path('/profiles/valets/'.$user->pic);
+                    if (!empty($user->pic)) {
+
+                        if (File::exists($file)) {
+                            unlink($file);
+                        }
+                    }else{
+                        $profile_pic=$user->pic;
+                    }
+                    $profile_pic = $request->file('pic');
+                    $extension = $profile_pic->getClientOriginalExtension();
+                    $profile_pic=time()."-profile.".$extension;
+                    $request->pic->move(public_path('/profiles/valets/'),$profile_pic);
+                }
+
+                $user->first_name = $request->first_name;
+                $user->last_name = $request->last_name;
+                $user->phone = $request->phone;
+                $user->pic = $profile_pic ?? null;
+                if (isset($request->password)){
+                    $user->password = Hash::make($request->password);
+                }
+                    $user->save();
+                    $valet = Valet::where('user_id',$user->id)->first();
+                    $valet->valet_manager_location_id = $request->valet_manager_location_id;
+                    $valet->save();
+            }
         }else{
             return Response::json([
                 'success' => false,
@@ -213,8 +323,94 @@ class userController extends Controller
 
         return Response::json([
             'success' => true,
+            'msg' => 'User successfully updated',
             'user'=>$user,
         ], 200);
+
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $email = $request->email;
+        $user = User::where('email',$email)->first();
+        if (isset($user)){
+            $code = substr(md5(time()), 0, 6);
+            $old = DB::table('password_resets')->where('email',$email)->first();
+            if (isset($old)){
+                DB::table('password_resets')->update([
+                    'token' => $code,
+                    'created_at' => now()
+                ]);
+            }else{
+                DB::table('password_resets')->insert([
+                    'email' => $email,
+                    'token' => $code,
+                    'created_at' => now()
+                ]);
+            }
+            Mail::to($email)->send(new ResetPasswordCode($code));
+            return Response::json([
+                'success' => true,
+                'msg'=>'A code is been send at your email please use that code to reset password',
+            ], 200);
+        }else{
+            return Response::json([
+                'success' => false,
+                'msg'=>'No user with this email exists',
+            ], 302);
+        }
+
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email'=>['required'],
+            'code'=>['required','min:6'],
+            'password'=>['required','min:6']]);
+
+        if ($validator->fails()){
+            return Response::json([
+                'success' => false,
+                'msg'=> $validator->messages(),
+            ], 301);
+        }else{
+            $email = $request->email;
+            $code = $request->code;
+            $password = Hash::make($request->password);
+            $user = User::where('email',$email)->first();
+            $old = DB::table('password_resets')->where('email',$email)->first();
+
+            if (isset($user)){
+                if (isset($old)){
+                    $check = ($old->token) == $code;
+                    if ($check){
+                        $user->password = $password;
+                        $user->save();
+                        return Response::json([
+                            'success' => true,
+                            'msg'=>'Password successfully updated',
+                        ], 200);
+                    }else{
+                        return Response::json([
+                            'success' => false,
+                            'msg'=>'Code is incorrect',
+                        ], 302);
+                    }
+                }else{
+                    return Response::json([
+                        'success' => false,
+                        'msg'=>'Please try again to reset password',
+                    ], 302);
+                }
+            }else{
+                return Response::json([
+                    'success' => false,
+                    'msg'=>'No user with this email exists',
+                ], 302);
+            }
+        }
+
 
     }
 }
