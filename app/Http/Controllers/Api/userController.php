@@ -85,6 +85,8 @@ class userController extends Controller
                         $location->save();
                     }
                 }
+
+                $user->pic = url('profiles/managers/'.$user->pic);
                 return Response::json([
                     'success' => true,
                     'msg'=> 'Valet Manager Signed Up Successfully',
@@ -93,6 +95,7 @@ class userController extends Controller
 
             }elseif($request->role_id == 4){
                 $user->save();
+                $user->pic = url('profiles/customers/'.$user->pic);
                 return Response::json([
                     'success' => true,
                     'msg'=> 'Customer Signed Up Successfully',
@@ -113,8 +116,12 @@ class userController extends Controller
             $user = Auth::user();
             if ($user->role_id == 2){
                 $user['manager'] = ValetManager::where('user_id',$user->id)->with('locations')->get();
+                $user->pic = url('profiles/managers/'.$user->pic);
             }elseif ($user->role_id == 3){
                 $user['valet'] = Valet::where('user_id',$user->id)->get();
+                $user->pic = url('profiles/valets/'.$user->pic);
+            }elseif ($user->role_id == 4){
+                $user->pic = url('profiles/customers/'.$user->pic);
             }
             $token = $user->createToken('auth-token')->plainTextToken;
             return response()->json([
@@ -171,6 +178,7 @@ class userController extends Controller
                 $valet->save();
 
 
+                $user->pic = url('profiles/valets/'.$user->pic);
                 return Response::json([
                     'success' => true,
                     'msg'=> 'Valet Successfully Registered',
@@ -281,7 +289,7 @@ class userController extends Controller
                             }
                         }
                     }
-
+                    $user->pic = url('profiles/managers/'.$user->pic);
         }elseif ($user->role_id == 3){
             $validator = Validator::make($request->all(), [
                 'first_name'=>['required'],
@@ -325,6 +333,46 @@ class userController extends Controller
                     $valet->valet_manager_location_id = $request->valet_manager_location_id;
                     $valet->save();
             }
+            $user->pic = url('profiles/valets/'.$user->pic);
+        }elseif ($user->role_id == 4){
+            $validator = Validator::make($request->all(), [
+                'first_name'=>['required'],
+                'last_name'=>['required'],
+                'phone'=>['required','min:1']]);
+
+            if ($validator->fails()){
+                return Response::json([
+                    'success' => false,
+                    'msg'=> $validator->messages(),
+                ], 301);
+            }else{
+                if($request->hasFile('pic'))
+                {
+                    $file=public_path('/profiles/customers/'.$user->pic);
+                    if (!empty($user->pic)) {
+
+                        if (File::exists($file)) {
+                            unlink($file);
+                        }
+                    }else{
+                        $profile_pic=$user->pic;
+                    }
+                    $profile_pic = $request->file('pic');
+                    $extension = $profile_pic->getClientOriginalExtension();
+                    $profile_pic=time()."-profile.".$extension;
+                    $request->pic->move(public_path('/profiles/customers/'),$profile_pic);
+                }
+
+                $user->first_name = $request->first_name;
+                $user->last_name = $request->last_name;
+                $user->phone = $request->phone;
+                $user->pic = $profile_pic ?? null;
+                if (isset($request->password)){
+                    $user->password = Hash::make($request->password);
+                }
+                $user->save();
+            }
+            $user->pic = url('profiles/customers/'.$user->pic);
         }else{
             return Response::json([
                 'success' => false,
