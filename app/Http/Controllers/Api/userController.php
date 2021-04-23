@@ -130,7 +130,16 @@ class userController extends Controller
                 'token' =>$token
             ], 200);
         } else {
-            return response()->json(['error' => 'UnAuthorized'], 203);
+            $user = User::where('email',$request->email)->first();
+            if ($user){
+                 $chk = Hash::check($request->password,$user->password);
+                 if (!$chk){
+                     $msg = 'Incorrect Password';
+                 }
+            }else{
+                $msg = 'Email address not found';
+            }
+            return response()->json(['error' => 'UnAuthorized','msg'=>$msg], 203);
         }
     }
 
