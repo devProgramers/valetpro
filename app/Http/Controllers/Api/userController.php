@@ -117,11 +117,14 @@ class userController extends Controller
             if ($user->role_id == 2){
                 $user['manager'] = ValetManager::where('user_id',$user->id)->with('locations')->get();
                 $user->pic = url('profiles/managers/'.$user->pic);
+                $user->role = Auth::user()->role;
             }elseif ($user->role_id == 3){
                 $user['valet'] = Valet::where('user_id',$user->id)->get();
                 $user->pic = url('profiles/valets/'.$user->pic);
+                $user->role = Auth::user()->role;
             }elseif ($user->role_id == 4){
                 $user->pic = url('profiles/customers/'.$user->pic);
+                $user->role = Auth::user()->role;
             }
             $token = $user->createToken('auth-token')->plainTextToken;
             return response()->json([
