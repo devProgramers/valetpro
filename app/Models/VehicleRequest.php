@@ -8,4 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class VehicleRequest extends Model
 {
     use HasFactory;
+    public function valetRequest(){
+        return $this->belongsTo(ValetRequest::class);
+    }
 }
