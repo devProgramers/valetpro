@@ -23,6 +23,7 @@ Route::GROUP(['namespace'=>'App\Http\Controllers\Api'], function () {
 Route::GROUP(['namespace'=>'App\Http\Controllers\Api','middleware' => ['auth:sanctum']], function () {
     Route::post('signup/valet','userController@signUpValet');
     Route::get('user/edit/{id}','userController@edit');
+    Route::get('get_locations','userController@getLocations');
     Route::post('user/update/{id}','userController@update');
     Route::post('show/locations','ValetRequestController@locations');
     Route::post('request/valet','ValetRequestController@requestValet');

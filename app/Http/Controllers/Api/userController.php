@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\ResetPasswordCode;
+use App\Mail\ValetSignUp;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Valet;
@@ -191,6 +192,8 @@ class userController extends Controller
 
 
                 $user->pic = url('profiles/valets/'.$user->pic);
+                $data = array('email'=>$request->email,'password'=>$request->password,'name'=>$request->first_name);
+                Mail::to($request->email)->send(new ValetSignUp($data));
                 return Response::json([
                     'success' => true,
                     'msg'=> 'Valet Successfully Registered',
@@ -203,6 +206,18 @@ class userController extends Controller
                 ], 302);
             }
         }
+    }
+
+    public function getLocations()
+    {
+        $user = Auth::user();
+        $locations = ValetManagerLocation::where('valet_manager_id',$user->id)->get();
+
+        return Response::json([
+            'success' => true,
+            'locations'=>$locations,
+        ], 200);
+
     }
 
     public function edit($id)
