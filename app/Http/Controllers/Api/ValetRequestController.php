@@ -192,6 +192,13 @@ class ValetRequestController extends Controller
             'settledRequests' => $settledRequests
         ], 200);
     }
+    public function singleRequest($id){
+        $valetRequest = ValetRequest::find($id);
+        return Response::json([
+            'success' => true,
+            'request'=>$valetRequest,
+        ], 200);
+    }
     public function valetStatus($id){
         $vrequest = ValetRequest::find($id);
         $data = new ValetStatus($vrequest);
