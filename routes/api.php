@@ -19,7 +19,6 @@ Route::GROUP(['namespace'=>'App\Http\Controllers\Api'], function () {
     Route::post('signin','userController@signIn');
     Route::post('forgot/password','userController@forgotPassword');
     Route::post('update/password','userController@updatePassword');
-    Route::get('valet_status/{id}','ValetRequestController@valetStatus');
 });
 Route::GROUP(['namespace'=>'App\Http\Controllers\Api','middleware' => ['auth:sanctum']], function () {
     Route::post('signup/valet','userController@signUpValet');
@@ -36,4 +35,6 @@ Route::GROUP(['namespace'=>'App\Http\Controllers\Api','middleware' => ['auth:san
     Route::get('ticket','VehicleRequestController@getTicket');
     Route::post('request/vehicle','VehicleRequestController@requestVehicle');
     Route::get('respond/vehicle/request/{status}/{id}','VehicleRequestController@respondRequest');
+    Route::get('valet_status/{id}','ValetRequestController@valetStatus');
+    Route::get('vehicle_status/{id}','VehicleRequestController@vehicleStatus');
 });
