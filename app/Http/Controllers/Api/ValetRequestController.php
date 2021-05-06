@@ -147,6 +147,13 @@ class ValetRequestController extends Controller
             $uid = ValetManagerLocation::where('valet_manager_id',$valet_request->location_id)->first()->valet_manager_id;
             $message = 'Valet has cancled the request for ticket:'.$valet_request->ticket_number.'.Please assign some new valet';
             sendNotification($uid,$message);
+        }elseif($status == 5){
+            $uid = $valet_request->valet_id ;
+            $message = 'Customer has canceled your request for ticket:'.$valet_request->ticket_number;
+            sendNotification($uid,$message);
+            $uid = ValetManagerLocation::where('valet_manager_id',$valet_request->location_id)->first()->valet_manager_id;
+            $message = 'Customer has canceled the request for ticket:'.$valet_request->ticket_number;
+            sendNotification($uid,$message);
         }
         return Response::json([
             'success' => true,
@@ -172,9 +179,8 @@ class ValetRequestController extends Controller
     }
     public function valetStatus($id){
         $vrequest = ValetRequest::find($id);
-//        dd($vrequest);
         $data = new ValetStatus($vrequest);
-        $status = broadcast($data);
+        broadcast($data);
         return Response::json([
             'success' => true,
             'status'=> $data->broadcastWith(),

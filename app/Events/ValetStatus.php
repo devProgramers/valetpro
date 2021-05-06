@@ -40,6 +40,6 @@ class ValetStatus implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('status');
+        return new Channel('valetStatus');
     }
 }

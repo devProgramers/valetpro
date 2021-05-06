@@ -19,7 +19,7 @@ class CreateVehicleRequestsTable extends Migration
             $table->string('longitude');
             $table->string('latitude');
             $table->time('ready_at');
-            $table->integer('status')->default(0)->comment('0:requested, 1:accepted, 2:arrived, 3:completed,4:canceled');
+            $table->integer('status')->default(0)->comment('0:requested, 1:accepted, 2:arrived, 3:completed,4:canceled,5:canceled by customer');
             $table->timestamps();
 
             $table->foreign('valet_request_id')->references('id')->on('valet_requests');
