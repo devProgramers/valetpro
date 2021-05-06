@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
+use App\Events\ValetStatus;
 
 class ValetRequestController extends Controller
 {
@@ -167,6 +168,16 @@ class ValetRequestController extends Controller
         return Response::json([
             'success' => true,
             'msg'=> 'Request completed',
+        ], 200);
+    }
+    public function valetStatus($id){
+        $vrequest = ValetRequest::find($id);
+//        dd($vrequest);
+        $data = new ValetStatus($vrequest);
+        $status = broadcast($data);
+        return Response::json([
+            'success' => true,
+            'status'=> $data->broadcastWith(),
         ], 200);
     }
 }
