@@ -193,10 +193,10 @@ class ValetRequestController extends Controller
         ], 200);
     }
     public function singleRequest($id){
-        $valetRequest = ValetRequest::find($id);
+        $valetRequest = ValetRequest::where('id',$id)->with('location')->first();
         return Response::json([
             'success' => true,
-            'request'=>$valetRequest,
+            'request'=>$valetRequest
         ], 200);
     }
     public function valetStatus($id){
