@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Valet;
 use App\Models\ValetManagerLocation;
 use App\Models\ValetRequest;
+use App\Models\VehicleRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
@@ -175,6 +176,20 @@ class ValetRequestController extends Controller
         return Response::json([
             'success' => true,
             'msg'=> 'Request completed',
+        ], 200);
+    }
+    public function requestList(){
+        $user = Auth::user();
+        $locations = ValetManagerLocation::where('valet_manager_id',$user->id)->pluck('id');
+        $pendingValets = ValetRequest::where('status',0)->whereIn('location_id',$locations)->get();
+        $pendings = ValetRequest::where('status',3)->whereIn('location_id',$locations)->pluck('id');
+        $pendingVehicles = VehicleRequest::where('status',0)->whereIn('valet_request_id',$pendings)->with('valetRequest')->get();
+        $settledRequests = VehicleRequest::where('status',5)->whereIn('valet_request_id',$pendings)->with('valetRequest')->get();
+        return Response::json([
+            'success' => true,
+            'pendingRequests'=>$pendingValets,
+            'pendingVehicles'=>$pendingVehicles,
+            'settledRequests' => $settledRequests
         ], 200);
     }
     public function valetStatus($id){
