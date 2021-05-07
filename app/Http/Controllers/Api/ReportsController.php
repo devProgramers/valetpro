@@ -18,11 +18,18 @@ class ReportsController extends Controller
         $startDate = $request->start_date;
         $endDate = $request->end_data;
         $valets = Valet::where('valet_manager_id',$manager->id)->get()->pluck('user_id');
-        $directTips = DirectTip::whereIn('valet_id',$valets)->whereBetween('created_at',[$startDate,$endDate])->get();
-        $poolTips = PoolTip::where('valet_id'.$valets)->whereBetween('created_at',[$startDate,$endDate])->get();
+        $directTips = DirectTip::whereIn('valet_id',$valets)->whereBetween('created_at',[$startDate,$endDate])->with('valets')->get();
+        $poolTips = PoolTip::whereIn('valet_id',$valets)->whereBetween('created_at',[$startDate,$endDate])->with('valets')->get();
+        $directTipsTotal = $directTips->sum('amount');
+        $poolTipsTotal = $poolTips->sum('amount');
+        $totalRevenew = $directTipsTotal + $poolTipsTotal;
         return Response::json([
             'success' => true,
-            'msg'=> ''
+            'directTipsTotal' => $directTipsTotal,
+            'poolTipsTotal' => $poolTipsTotal,
+            'totalRevenew' => $totalRevenew,
+            'directTips'=> $directTips,
+            'poolTips'=> $poolTips
         ], 200);
 
     }

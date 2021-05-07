@@ -8,4 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class PoolTip extends Model
 {
     use HasFactory;
+
+    public function valets(){
+        return $this->hasMany(User::class,'id','valet_id');
+    }
+
+    public function valetManagers(){
+        return $this->hasMany( ValetManager::class);
+    }
+
+    public function loctions(){
+        return $this->hasMany( ValetManagerLocation::class);
+    }
 }
