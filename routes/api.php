@@ -29,6 +29,7 @@ Route::GROUP(['namespace'=>'App\Http\Controllers\Api','middleware' => ['auth:san
     Route::post('request/valet','ValetRequestController@requestValet');
     Route::get('ticket','VehicleRequestController@getTicket');
     Route::post('request/vehicle','VehicleRequestController@requestVehicle');
+    Route::post('tip/valet','TipsController@tip');
     //valet managers
     Route::post('signup/valet','userController@signUpValet');
     Route::get('get_locations','userController@getLocations');

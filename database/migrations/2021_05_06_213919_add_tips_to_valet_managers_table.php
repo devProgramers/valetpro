@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTipsTable extends Migration
+class AddTipsToValetManagersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class CreateTipsTable extends Migration
      */
     public function up()
     {
-        Schema::create('tips', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('valet_managers', function (Blueprint $table) {
+            $table->boolean('tips')->after('company_name')->default(0)->comment('0:individual, 1:pooled');
         });
     }
 
@@ -26,6 +25,8 @@ class CreateTipsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tips');
+        Schema::table('valet_managers', function (Blueprint $table) {
+            $table->dropColumn('tips');
+        });
     }
 }

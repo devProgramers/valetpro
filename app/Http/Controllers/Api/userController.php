@@ -73,6 +73,9 @@ class userController extends Controller
                 $manager = new ValetManager;
                 $manager->user_id = $user->id;
                 $manager->company_name = $request->company_name;
+                if (isset($request->tips)){
+                    $manager->tips = $request->tips;
+                }
                 $manager->save();
 
                 if (is_array($request->location)){
