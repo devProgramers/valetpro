@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\DirectTip;
 use App\Models\PoolTip;
+use App\Models\Review;
 use App\Models\Valet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,6 +31,19 @@ class ReportsController extends Controller
             'totalRevenew' => $totalRevenew,
             'directTips'=> $directTips,
             'poolTips'=> $poolTips
+        ], 200);
+
+    }
+    public function ratingReport(Request $request)
+    {
+        $manager = Auth::user();
+        $startDate = $request->start_date;
+        $endDate = $request->end_data;
+        $valets = Valet::where('valet_manager_id',$manager->id)->get()->pluck('user_id');
+        $ratings = Review::whereIn('valet_id',$valets)->with('valets')->get();
+        return Response::json([
+            'success' => true,
+            'ratings' => $ratings,
         ], 200);
 
     }
