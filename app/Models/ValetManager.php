@@ -20,4 +20,8 @@ class ValetManager extends Model
     public function valets(){
         return $this->hasMany(Valet::class);
     }
+
+    public function poolTips(){
+        return $this->hasMany(PoolTip::class);
+    }
 }

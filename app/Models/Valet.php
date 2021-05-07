@@ -16,4 +16,7 @@ class Valet extends Model
     public function manager(){
         return $this->hasOne(ValetManager::class);
     }
+    public function tips(){
+        return $this->hasMany(DirectTip::class);
+    }
 }

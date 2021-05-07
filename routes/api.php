@@ -37,6 +37,7 @@ Route::GROUP(['namespace'=>'App\Http\Controllers\Api','middleware' => ['auth:san
     Route::post('assign/valet/{id}','ValetRequestController@assignValet');
     Route::get('requests/list','ValetRequestController@requestList');
     Route::get('request/{id}','ValetRequestController@singleRequest');
+    Route::post('set/tip/type','TipsController@setTipType');
     //valets
     Route::get('view/assigned_requests','ValetRequestController@assingedRequests');
     Route::get('respond/request/{status}/{id}','ValetRequestController@respondRequest');
