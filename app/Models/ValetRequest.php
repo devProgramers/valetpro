@@ -18,4 +18,10 @@ class ValetRequest extends Model
     public function customers(){
         return $this->hasOne(User::class,'id','customer_id');
     }
+    public function poolTips(){
+        return $this->hasMany(PoolTip::class,'id','request_id');
+    }
+    public function tips(){
+        return $this->hasMany(DirectTip::class,'id','request_id');
+    }
 }
