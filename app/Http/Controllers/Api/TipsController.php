@@ -7,6 +7,7 @@ use App\Models\DirectTip;
 use App\Models\PoolTip;
 use App\Models\Review;
 use App\Models\User;
+use App\Models\Valet;
 use App\Models\ValetManager;
 use App\Models\ValetManagerLocation;
 use App\Models\ValetRequest;
@@ -34,6 +35,7 @@ class TipsController extends Controller
         ], 200);
 
     }
+
     public function tip(Request $request)
     {
         $customer = Auth::user();
@@ -63,6 +65,7 @@ class TipsController extends Controller
         ], 200);
 
     }
+
     private function addReview($valet_id, $customer_id, $valet_request_id, $rating, $comment)
     {
         $review = new Review;
@@ -72,5 +75,18 @@ class TipsController extends Controller
         $review->rating = $rating;
         $review->comment = $comment;
         $review->save();
+    }
+
+    public function getTotalTips()
+    {
+        $manager = Auth::user();
+        $tips = PoolTip::where(['valet_manager_id'=>$manager->id,'status'=>0])->sum('amount');
+        $valets = Valet::where('valet_manager_id',$manager->id)->with('user')->get();
+        return Response::json([
+            'success' => true,
+            'tips'=> $tips,
+            'valets'=> $valets
+        ], 200);
+
     }
 }

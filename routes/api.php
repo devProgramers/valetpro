@@ -40,6 +40,7 @@ Route::GROUP(['namespace'=>'App\Http\Controllers\Api','middleware' => ['auth:san
     Route::post('set/tip/type','TipsController@setTipType');
     Route::post('tips/report','ReportsController@tipsReport');
     Route::post('rating/report','ReportsController@ratingReport');
+    Route::get('get/tips','TipsController@getTotalTips');
     //valets
     Route::get('view/assigned_requests','ValetRequestController@assingedRequests');
     Route::get('respond/request/{status}/{id}','ValetRequestController@respondRequest');
