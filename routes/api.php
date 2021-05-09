@@ -46,7 +46,9 @@ Route::GROUP(['namespace'=>'App\Http\Controllers\Api','middleware' => ['auth:san
     Route::get('respond/request/{status}/{id}','ValetRequestController@respondRequest');
     Route::get('complete/request/{id}','ValetRequestController@completeRequest');
     Route::get('respond/vehicle/request/{status}/{id}','VehicleRequestController@respondRequest');
-
+    Route::get('get/all/tips','TipsController@getTotalValetTips');
+    Route::get('get/direct/tips','TipsController@getTotalDirectTips');
+    Route::post('respond/tip','TipsController@respond');
     //broadcasts
     Route::get('valet_status/{id}','ValetRequestController@valetStatus');
     Route::get('vehicle_status/{id}','VehicleRequestController@vehicleStatus');

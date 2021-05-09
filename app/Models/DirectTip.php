@@ -20,4 +20,8 @@ class DirectTip extends Model
     public function loctions(){
         return $this->hasMany( ValetManagerLocation::class);
     }
+
+    public function customer(){
+        return $this->belongsTo(User::class,'customer_id','id');
+    }
 }

@@ -55,6 +55,7 @@ class TipsController extends Controller
             $tip = new DirectTip;
             $tip->valet_id = $valet->id;
             $tip->request_id = $valet_request->id;
+            $tip->customer_id = $valet_request->customer_id;
             $tip->amount = $request->amount;
             $tip->save();
         }
@@ -62,6 +63,16 @@ class TipsController extends Controller
         return Response::json([
             'success' => true,
             'msg'=>'Tip Send. Thank you!',
+        ], 200);
+
+    }
+
+    public function respond(Request $request)
+    {
+        $msg = $request->message;
+        return Response::json([
+            'success' => true,
+            'msg'=>'Greeting Send. Thank you!',
         ], 200);
 
     }
@@ -86,6 +97,35 @@ class TipsController extends Controller
             'success' => true,
             'tips'=> $tips,
             'valets'=> $valets
+        ], 200);
+
+    }
+
+    public function getTotalValetTips()
+    {
+        $valet = Auth::user();
+        $valets = Valet::where('valet_manager_id',$valet->valet->valet_manager_id)->count();
+        $poolTips = PoolTip::where(['valet_manager_id'=>$valet->valet->valet_manager_id,'status'=>0])->sum('amount');
+        $poolTips = ((100/$valets)/100)*$poolTips;
+        $directTips = DirectTip::where(['valet_id'=>$valet->id,'status'=>0])->sum('amount');
+        $tips = $directTips + $poolTips;
+        return Response::json([
+            'success' => true,
+            'tips'=> $tips,
+            'poolTips'=> $poolTips,
+            'directTips'=> (int)$directTips
+        ], 200);
+
+    }
+
+    public function getTotalDirectTips()
+    {
+        $valet = Auth::user();
+        $directTips = DirectTip::where(['valet_id'=>$valet->id,'status'=>0])->with('customer')->get();
+        $sum = $directTips->sum('amount');
+        return Response::json([
+            'success' => true,
+            'directTips'=> $directTips
         ], 200);
 
     }

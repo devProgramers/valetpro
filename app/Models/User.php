@@ -48,7 +48,7 @@ class User extends Authenticatable
     public function managers(){
         return $this->hasMany(ValetManager::class);
     }
-    public function valets(){
-        return $this->hasMany(Valet::class);
+    public function valet(){
+        return $this->hasOne(Valet::class);
     }
 }
