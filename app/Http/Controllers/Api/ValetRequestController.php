@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\PoolTip;
 use App\Models\User;
 use App\Models\Valet;
 use App\Models\ValetManagerLocation;
@@ -95,9 +96,14 @@ class ValetRequestController extends Controller
 
     public function getValetsList(){
         $manager = Auth::user();
+        $locations = ValetManagerLocation::where('valet_manager_id',$manager->id)->get()->pluck('id');
+        $requestCount = ValetRequest::whereIn('location_id',$locations)->where('status',0)->count();
         $valets = Valet::where('valet_manager_id',$manager->id)->with('user')->get();
+        $tips = PoolTip::where('valet_manager_id',$manager->id)->whereDay('created_at', now()->day)->sum('amount');
         return Response::json([
             'success' => true,
+            'requestCount' => $requestCount,
+            'tips' => $tips,
             'valets'=> $valets,
         ], 200);
     }
