@@ -123,7 +123,7 @@ class VehicleRequestController extends Controller
             $message = 'Valet has canceled your request for ticket:'.$valet_request->ticket_number.' wait a while manager will look into it and assign some new valet soon.';
             sendNotification($uid,$message);
             $uid = ValetManagerLocation::where('valet_manager_id',$valet_request->location_id)->first()->valet_manager_id;
-            $message = 'Valet has cancled the request for ticket:'.$valet_request->ticket_number.'.Please assign some new valet';
+            $message = 'Valet has delivered the request for ticket:'.$valet_request->ticket_number.'.Please assign some new valet';
             sendNotification($uid,$message);
             $msg ='Canceled successfully';
         }elseif($status == 6){
