@@ -72,7 +72,7 @@ class VehicleRequestController extends Controller
     }
 
     public function respondRequest($status,$id){
-        $vehicle_request =  VehicleRequest::find($id);
+        $vehicle_request =  VehicleRequest::where('valet_request_id',$id)->first();
         $vehicle_request->status = $status;
         $vehicle_request->save();
         $valet_request = ValetRequest::where('id',$vehicle_request->valet_request_id)->first();
