@@ -171,7 +171,7 @@ class ValetRequestController extends Controller
     public function completeRequest($id){
         $user = Auth::user();
         $assingedRequest = ValetRequest::find($id);
-        $assingedRequest->status = 4;
+        $assingedRequest->status = 3;
         $assingedRequest->save();
         $uid = $assingedRequest->customer_id;
         $message = 'Valet has completed your request for ticket:'.$assingedRequest->ticket_number;
