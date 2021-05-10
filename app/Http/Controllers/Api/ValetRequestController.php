@@ -190,7 +190,7 @@ class ValetRequestController extends Controller
         $pendingValets = ValetRequest::where('status',0)->whereIn('location_id',$locations)->get();
         $pendings = ValetRequest::where('status',3)->whereIn('location_id',$locations)->pluck('id');
         $pendingVehicles = VehicleRequest::where('status',0)->whereIn('valet_request_id',$pendings)->with('valetRequest')->get();
-        $settledRequests = VehicleRequest::where('status',5)->whereIn('valet_request_id',$pendings)->with('valetRequest')->get();
+        $settledRequests = VehicleRequest::where('status',3)->whereIn('valet_request_id',$pendings)->with('valetRequest')->get();
         return Response::json([
             'success' => true,
             'pendingRequests'=>$pendingValets,
