@@ -50,4 +50,32 @@ class AdminController extends Controller
             ], 302);
         }
     }
+    public function usersReport(Request $request)
+    {
+        $from = date($request->from);
+        $to = date($request->to);
+        $all = User::whereBetween('created_at',[$from,$to])->whereNotIn('role_id', [1])->get();
+        $allcount = User::whereBetween('created_at',[$from,$to])->whereNotIn('role_id', [1])->count();
+        $customers = User::whereBetween('created_at',[$from,$to])->where('role_id',4)->get();
+        $customerscount = User::whereBetween('created_at',[$from,$to])->where('role_id',4)->count();
+        $valets = User::whereBetween('created_at',[$from,$to])->where('role_id',3)->get();
+        $valetscount = User::whereBetween('created_at',[$from,$to])->where('role_id',3)->count();
+        $valet_managers = User::whereBetween('created_at',[$from,$to])->where('role_id',2)->get();
+        $valet_managerscount = User::whereBetween('created_at',[$from,$to])->where('role_id',2)->count();
+        if (isset($all)){
+            return Response::json([
+                'success' => true,
+                'counts'=> array('all'=>$allcount,'customers'=>$customerscount,'valets'=>$valetscount,'managers'=>$valet_managerscount),
+                'all'=> $all,
+                'customers'=> $customers,
+                'valets'=> $valets,
+                'valet_managers'=> $valet_managers,
+            ], 200);
+        }else{
+            return Response::json([
+                'success' => false,
+                'msg'=> 'No data found',
+            ], 302);
+        }
+    }
 }

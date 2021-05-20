@@ -27,6 +27,7 @@ Route::GROUP(['namespace'=>'App\Http\Controllers\Api','middleware' => ['auth:san
     //admin
     Route::get('users','AdminController@users');
     Route::post('repots/rating','AdminController@ratingReport');
+    Route::post('repots/users','AdminController@usersReport');
     //customers
     Route::post('show/locations','ValetRequestController@locations');
     Route::post('request/valet','ValetRequestController@requestValet');
