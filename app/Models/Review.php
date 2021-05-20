@@ -9,7 +9,10 @@ class Review extends Model
 {
     use HasFactory;
 
-    public function valets(){
-        return $this->hasMany(User::class,'id','valet_id');
+    public function valet(){
+        return $this->belongsTo(User::class,'valet_id','id');
+    }
+    public function customer(){
+        return $this->belongsTo(User::class,'customer_id','id');
     }
 }

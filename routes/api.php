@@ -26,6 +26,7 @@ Route::GROUP(['namespace'=>'App\Http\Controllers\Api','middleware' => ['auth:san
     Route::post('user/update/{id}','userController@update');
     //admin
     Route::get('users','AdminController@users');
+    Route::post('repots/rating','AdminController@ratingReport');
     //customers
     Route::post('show/locations','ValetRequestController@locations');
     Route::post('request/valet','ValetRequestController@requestValet');
