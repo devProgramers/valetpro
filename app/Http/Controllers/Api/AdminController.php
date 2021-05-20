@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\DirectTip;
+use App\Models\PoolTip;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -50,6 +52,7 @@ class AdminController extends Controller
             ], 302);
         }
     }
+
     public function usersReport(Request $request)
     {
         $from = date($request->from);
@@ -75,6 +78,28 @@ class AdminController extends Controller
             return Response::json([
                 'success' => false,
                 'msg'=> 'No data found',
+            ], 302);
+        }
+    }
+
+    public function revenueReport(Request $request)
+    {
+        $from = date($request->from);
+        $to = date($request->to);
+        $pooltips = PoolTip::whereBetween('created_at',[$from,$to])->sum('amount');
+        $directtips = DirectTip::whereBetween('created_at',[$from,$to])->sum('amount');
+        $total = (int)$pooltips + (int)$directtips;
+        if (isset($total)){
+            return Response::json([
+                'success' => true,
+                'pooltips'=> $pooltips,
+                'directtips'=> $directtips,
+                'total'=> $total
+            ], 200);
+        }else{
+            return Response::json([
+                'success' => false,
+                'msg'=> 'No records found',
             ], 302);
         }
     }
